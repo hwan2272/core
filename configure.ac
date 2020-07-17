@@ -3560,6 +3560,15 @@ cygwin*)
         WIN_MULTI_ARCH="x64"
         WIN_HOST_BITS=32
         ;;
+    aarch64)
+        CPUNAME=ARM64
+        RTL_ARCH=arm64
+        PLATFORMID=windows_arm64
+        WINDOWS_X64=1
+        SCPDEFS="$SCPDEFS -DWINDOWS_ARM64"
+        WIN_HOST_ARCH="arm64"
+        WIN_HOST_BITS=64
+        ;;
     *)
         AC_MSG_ERROR([Unsupported host_cpu $host_cpu for host_os $host_os])
         ;;
@@ -3568,6 +3577,7 @@ cygwin*)
     case "$build_cpu" in
     x86_64) WIN_BUILD_ARCH="x64" ;;
     i*86) WIN_BUILD_ARCH="x86" ;;
+    aarch64) WIN_BUILD_ARCH="arm64" ;;
     *)
         AC_MSG_ERROR([Unsupported build_cpu $build_cpu for host_os $host_os])
         ;;
@@ -3744,7 +3754,8 @@ if test "$_os" = "WINNT"; then
     BUILD_X64=
     CXX_X64_BINARY=
 
-    if test "$WIN_HOST_ARCH" = "x86"; then
+    case "$WIN_HOST_ARCH" in
+    x86)
         AC_MSG_CHECKING([for a x64 compiler and libraries for 64-bit Explorer extensions])
         if test -f "$COMPATH/atlmfc/lib/$WIN_MULTI_ARCH/atls.lib" -o \
              -f "$COMPATH/atlmfc/lib/spectre/$WIN_MULTI_ARCH/atls.lib"
@@ -3756,9 +3767,11 @@ if test "$_os" = "WINNT"; then
             AC_MSG_RESULT([not found])
             AC_MSG_WARN([Installation set will not contain 64-bit Explorer extensions])
         fi
-    else
+        ;;
+    x64)
         CXX_X64_BINARY=$CXX
-    fi
+        ;;
+    esac
     AC_SUBST(BUILD_X64)
 
     # These are passed to the environment and then used in gbuild/platform/com_MSC_class.mk
@@ -10747,6 +10760,7 @@ if test "$_os" = "WINNT"; then
     case "$WIN_HOST_ARCH" in
     x86) assembler=ml.exe ;;
     x64) assembler=ml64.exe ;;
+    arm64) assembler=armasm64.exe ;;
     esac
 
     AC_MSG_CHECKING([for the MSVC assembler ($assembler)])
