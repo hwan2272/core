@@ -17,8 +17,8 @@ $(eval $(call gb_ExternalProject_use_autoconf,libgpg-error,build))
 
 ifeq ($(COM),MSC)
 gb_ExternalProject_libgpg-error_host := $(if $(filter INTEL,$(CPUNAME)),i686-mingw32,x86_64-w64-mingw32)
-gb_ExternalProject_libgpg-error_target := $(if $(filter INTEL,$(CPUNAME)),pe-i386,pe-x86-64)
-$(call gb_ExternalProject_get_state_target,libgpg-error,build): $(call gb_Executable_get_target,cpp)
+gb_ExternalProject_libgpg-error_target := $(if $(filter INTEL,$(CPUNAME)),pe-i386,$(if $(filter ARM64,$(CPUNAME)),pe-arm64,pe-x86-64))
+$(call gb_ExternalProject_get_state_target,libgpg-error,build): $(call gb_Executable_get_target_for_build,cpp)
 	$(call gb_Trace_StartRange,libgpg-error,EXTERNAL)
 	$(call gb_ExternalProject_run,build,\
 		MAKE=$(MAKE) ./configure \
@@ -28,8 +28,14 @@ $(call gb_ExternalProject_get_state_target,libgpg-error,build): $(call gb_Execut
 			--disable-languages \
 			--disable-doc \
 			--disable-tests \
-			--host=$(gb_ExternalProject_libgpg-error_host) \
-			RC='windres -O COFF --target=$(gb_ExternalProject_libgpg-error_target) --preprocessor='\''$(call gb_Executable_get_target,cpp) -+ -DRC_INVOKED -DWINAPI_FAMILY=0 $(SOLARINC)'\' \
+			$(if $(CROSS_COMPILING), \
+	            --build=$(BUILD_PLATFORM) \
+				--host=$(HOST_PLATFORM) \
+				REAL_BUILD_CC="$(CC_FOR_BUILD)" \
+				CC_FOR_BUILD="$(call gb_Executable_get_target_for_build,gcc-wrapper) --wrapper-env-prefix=REAL_BUILD_ $(SOLARINC)" \
+			, \
+	            --host=$(gb_ExternalProject_libgpg-error_host)) \
+			RC='windres -O COFF --target=$(gb_ExternalProject_libgpg-error_target) --preprocessor='\''$(call gb_Executable_get_target_for_build,cpp) -+ -DRC_INVOKED -DWINAPI_FAMILY=0 $(SOLARINC)'\' \
 	    && $(MAKE) \
 	)
 	$(call gb_Trace_EndRange,libgpg-error,EXTERNAL)

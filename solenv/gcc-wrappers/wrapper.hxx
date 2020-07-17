@@ -20,7 +20,7 @@ string getexe(string exename, bool maybeempty = false);
 
 void setupccenv();
 
-string processccargs(vector<string> rawargs);
+string processccargs(vector<string> rawargs, string &env_prefix);
 
 int startprocess(string command, string args);
 

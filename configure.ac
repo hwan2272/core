@@ -5028,6 +5028,8 @@ AC_SUBST(LIBO_URE_LIB_FOLDER_FOR_BUILD)
 AC_SUBST(LIBO_URE_MISC_FOLDER_FOR_BUILD)
 AC_SUBST(SDKDIRNAME_FOR_BUILD)
 AC_SUBST(WORKDIR_FOR_BUILD)
+AC_SUBST(CC_FOR_BUILD)
+AC_SUBST(CXX_FOR_BUILD)
 
 dnl ===================================================================
 dnl Check for syslog header

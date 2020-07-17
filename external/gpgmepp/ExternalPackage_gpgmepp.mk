@@ -27,8 +27,10 @@ else ifeq ($(OS),WNT)
 
 $(eval $(call gb_ExternalPackage_add_file,gpgmepp,$(LIBO_LIB_FOLDER)/gpgme-w32spawn.exe,src/gpgme-w32spawn.exe))
 
+ifeq (,$(CROSS_COMPILING))
 $(call gb_Package_get_target_for_build,gpgmepp):
 	cp $(call gb_UnpackedTarball_get_dir,gpgmepp)/src/gpgme-w32spawn.exe $(call gb_Executable__get_dir_for_exe,cppunittester)/gpgme-w32spawn.exe
+endif
 
 endif
 

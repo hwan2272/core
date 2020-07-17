@@ -82,7 +82,12 @@ void setupccenv() {
     }
 }
 
-string processccargs(vector<string> rawargs) {
+string processccargs(vector<string> rawargs, string &env_prefix)
+{
+    // default env var prefix
+    env_prefix = "REAL_";
+    bool env_prefix_next_arg = false;
+
     // suppress the msvc banner
     string args=" -nologo";
     // TODO: should these options be enabled globally?
@@ -101,6 +106,13 @@ string processccargs(vector<string> rawargs) {
     string linkargs(" -link -debug");
 
     for(vector<string>::iterator i = rawargs.begin(); i != rawargs.end(); ++i) {
+        if (env_prefix_next_arg)
+        {
+            env_prefix = *i;
+            env_prefix_next_arg = false;
+            continue;
+        }
+
         args.append(" ");
         if(*i == "-o") {
             // TODO: handle more than just exe output
@@ -121,10 +133,15 @@ string processccargs(vector<string> rawargs) {
                 linkargs.append(" -dll -out:");
                 linkargs.append(*i);
             }
+            else if (dot == string::npos)
+            {
+                args.append("-Fe");
+                args.append(*i + ".exe");
+            }
             else
             {
                 cerr << "unknown -o argument - please adapt gcc-wrapper for \""
-                     << (*i) << "\"";
+                     << (*i) << "\"" << endl;
                 exit(1);
             }
         }
@@ -160,8 +177,32 @@ string processccargs(vector<string> rawargs) {
         else if(*i == "-Werror")
             args.append("-WX");
         else
-            args.append(*i);
+        {
+            size_t pos = i->find("=");
+            if (0 == i->compare(0, pos, "--wrapper-env-prefix"))
+            {
+                if (pos == string::npos)
+                    env_prefix_next_arg = true;
+                else if (pos + 1 == i->length())
+                {
+                    // bailout - missing arg
+                    env_prefix_next_arg = true;
+                    break;
+                }
+                else
+                    env_prefix = i->substr(pos + 1);
+            }
+            else
+                args.append(*i);
+        }
     }
+
+    if (env_prefix_next_arg)
+    {
+        cerr << "wrapper-env-prefix needs an argument!" << endl;
+        exit(1);
+    }
+
     args.append(linkargs);
     return args;
 }

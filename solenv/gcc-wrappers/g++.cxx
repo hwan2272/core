@@ -9,14 +9,16 @@
 
 #include "wrapper.hxx"
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
     vector<string> rawargs(argv + 1, argv + argc);
 
-    string command=getexe("REAL_CXX");
-    string flags=getexe("REAL_CXX_FLAGS", true);
+    string env_prefix; // defaults to REAL_
+    string args = processccargs(rawargs, env_prefix);
 
-    string args=flags.empty() ? string() : flags + " ";
-    args += processccargs(rawargs);
+    string command = getexe(env_prefix + "CXX");
+    string flags = getexe(env_prefix + "CXX_FLAGS", true);
+    args.insert(0, flags.empty() ? string() : flags + " ");
 
     setupccenv();
 
