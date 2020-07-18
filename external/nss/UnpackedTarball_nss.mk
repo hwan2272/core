@@ -27,6 +27,7 @@ $(eval $(call gb_UnpackedTarball_add_patches,nss,\
     external/nss/macos-dlopen.patch.0 \
     external/nss/nss.nspr-parallel-win-debug_build.patch \
 	external/nss/nss.getopt.patch.0 \
+	external/nss/nss-win-arm64.patch \
     $(if $(filter iOS,$(OS)), \
         external/nss/nss-ios.patch) \
     $(if $(filter ANDROID,$(OS)), \
